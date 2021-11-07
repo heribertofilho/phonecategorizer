@@ -1,0 +1,66 @@
+plugins {
+    id 'org.springframework.boot' version '2.5.6'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+group = 'jumia.heriberto'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    integrationTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+        java.srcDirs('./src/integrationTest/java')
+        resources.srcDirs('./src/integrationTest/resources')
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+}
+
+dependencies {
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.6'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.6'
+    // Swagger
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+    implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+    // Database
+    implementation 'org.xerial:sqlite-jdbc:3.36.0.2'
+    // Development Tools
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.6'
+    // Integration Test
+    integrationTestImplementation 'org.springframework.boot:spring-boot-starter-jdbc:2.5.6'
+    integrationTestRuntimeOnly 'com.h2database:h2:1.4.200'
+}
+
+task integrationTests(type: Test) {
+    description = 'Runs the integration tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    environment 'spring.profiles.active', 'integration'
+    testLogging { events "passed", "skipped", "failed" }
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+}
+
+check.dependsOn integrationTests
